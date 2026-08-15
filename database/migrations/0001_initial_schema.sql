@@ -1,0 +1,12 @@
+-- 0001_initial_schema.sql
+-- The initial schema is schema.sql (run once, in full, in the Supabase
+-- SQL Editor — see the header comment there). This migrations/ folder is
+-- for *incremental* changes that come after that baseline, numbered in
+-- order (0002_..., 0003_...), each one forward-only and idempotent
+-- (CREATE TABLE IF NOT EXISTS / ADD COLUMN IF NOT EXISTS) so it's safe to
+-- re-run against a database that's already partway migrated.
+--
+-- This file is a marker, not new SQL: it documents that everything in
+-- ../schema.sql, ../views.sql, ../indexes.sql and ../triggers.sql together
+-- constitute migration 0001 (the baseline). Nothing to run here beyond
+-- those four files.

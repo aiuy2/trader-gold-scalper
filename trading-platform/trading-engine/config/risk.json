@@ -1,0 +1,18 @@
+{
+  "risk": {
+    "fixed_lot": 0.01,
+    "risk_percent": 1.0,
+    "max_daily_loss_pct": 5.0,
+    "max_consecutive_losses": 3,
+    "stop_loss_pips": 150,
+    "take_profit_pips": 300,
+    "pip_size": 0.1
+  },
+  "strategy": {
+    "fast_ema_period": 8,
+    "slow_ema_period": 21,
+    "rsi_period": 14,
+    "rsi_overbought": 70,
+    "rsi_oversold": 30
+  }
+}

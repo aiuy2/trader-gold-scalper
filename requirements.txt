@@ -1,0 +1,15 @@
+# --- trading-engine ---
+python-dotenv>=1.0.0
+# Only installs/works on Windows with an MT5 terminal installed:
+MetaTrader5>=5.0.45
+
+# --- backend (FastAPI) ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.9
+pydantic[email]>=2.6.0
+cryptography>=42.0.0

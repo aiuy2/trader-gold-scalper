@@ -1,0 +1,9 @@
+"""health.py - unauthenticated health check for uptime monitoring."""
+from fastapi import APIRouter
+
+router = APIRouter(tags=["health"])
+
+
+@router.get("/health")
+def health():
+    return {"status": "ok"}
