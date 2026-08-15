@@ -16,3 +16,4 @@ passlib[bcrypt]>=1.7.4
 python-multipart>=0.0.9
 pydantic[email]>=2.6.0
 cryptography>=42.0.0
+
