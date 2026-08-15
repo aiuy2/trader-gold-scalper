@@ -1,0 +1,10 @@
+# local-client - runs on the user's own machine, next to their MT5 terminal
+python-dotenv>=1.0.0
+requests>=2.31.0
+cryptography>=42.0.0
+websocket-client>=1.7.0
+
+# Only needed / only installs when TRADER_MODE=live (Windows + an MT5
+# terminal installed). Leave commented out for mock-mode testing on
+# any OS; uncomment (or pip install manually) when going live.
+# MetaTrader5>=5.0.45
