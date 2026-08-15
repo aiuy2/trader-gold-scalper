@@ -20,11 +20,11 @@ if TRADING_ENGINE_PATH not in sys.path:
 
 from database.database import SessionLocal
 from database.repositories import workers as workers_repo
-from database.repositories import trades as trades_repo
 from database.repositories import positions as positions_repo
 from database.repositories import bots as bots_repo
 from websocket.loop_registry import emit_threadsafe
 from websocket import events as ws_events
+from services import trade_sync
 
 
 class BotRunner:
@@ -101,54 +101,9 @@ class BotRunner:
             db.close()
 
     def _sync_state(self, db, outcome):
-        if outcome.get("action") == "opened_trade" and outcome.get("order_result", {}).get("success"):
-            ticket = outcome["order_result"]["ticket"]
-            if ticket not in self._known_tickets:
-                self._known_tickets.add(ticket)
-                trade = trades_repo.create(
-                    db,
-                    user_id=self.user_id,
-                    worker_id=self.worker_row_id,
-                    ticket=ticket,
-                    symbol=self.symbol,
-                    direction=outcome["direction"],
-                    lot=outcome["trade_params"]["lot"],
-                    entry_price=outcome["order_result"]["entry_price"],
-                    stop_loss=outcome["trade_params"]["stop_loss"],
-                    take_profit=outcome["trade_params"]["take_profit"],
-                )
-                positions_repo.create(
-                    db,
-                    user_id=self.user_id,
-                    worker_id=self.worker_row_id,
-                    ticket=ticket,
-                    symbol=self.symbol,
-                    direction=outcome["direction"],
-                    lot=outcome["trade_params"]["lot"],
-                    entry_price=outcome["order_result"]["entry_price"],
-                    stop_loss=outcome["trade_params"]["stop_loss"],
-                    take_profit=outcome["trade_params"]["take_profit"],
-                )
-                emit_threadsafe(ws_events.emit(self.user_id, ws_events.TRADE_OPENED, {
-                    "ticket": ticket, "symbol": self.symbol, "direction": outcome["direction"],
-                    "lot": trade.lot, "entry_price": trade.entry_price,
-                }))
-
-        elif outcome.get("action") == "closed_trade":
-            ticket = outcome.get("ticket")
-            close_result = outcome.get("close_result", {})
-            exit_price = close_result.get("exit_price")
-            pnl = outcome.get("pnl")
-
-            trade = trades_repo.get_by_ticket(db, self.user_id, ticket)
-            if trade and exit_price is not None:
-                trades_repo.close(db, trade, exit_price=exit_price, pnl=pnl)
-            positions_repo.delete_by_ticket(db, self.user_id, ticket)
-
-            emit_threadsafe(ws_events.emit(self.user_id, ws_events.TRADE_CLOSED, {
-                "ticket": ticket, "symbol": self.symbol, "reason": outcome.get("reason"),
-                "pnl": pnl, "exit_price": exit_price,
-            }))
+        trade_sync.sync_outcome(
+            db, self.user_id, self.worker_row_id, self.symbol, outcome, self._known_tickets
+        )
 
     def stop(self):
         self._stop_flag.set()
