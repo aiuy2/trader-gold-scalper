@@ -3,6 +3,9 @@ python-dotenv>=1.0.0
 # Only installs/works on Windows with an MT5 terminal installed:
 MetaTrader5>=5.0.45
 
+# --- license-system (standalone, desktop worker/EA side) ---
+requests>=2.31.0
+
 # --- backend (FastAPI) ---
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
