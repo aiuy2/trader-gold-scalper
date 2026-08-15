@@ -44,6 +44,17 @@ class BotRunner:
         from mt5.connector import MockMT5Connector
         from risk.risk_manager import RiskManager
 
+        # Live trading only ever runs on the user's own machine now, via
+        # local-client/run.py + a real MT5 terminal - this server-side
+        # runner exists purely for the mock-mode demo loop. Reject "live"
+        # here with a normal error response instead of letting it reach the
+        # connector = None case below and blow up as an uncaught 500; the
+        # local-client/README.md "next steps" note about disabling live
+        # trading from bot_service.py is effectively this guard.
+        if self.mode != "mock":
+            return {"success": False, "error": "live_mode_not_supported_here",
+                    "detail": "التداول الحقيقي يشتغل من العميل المحلي (local-client) فقط، مو من السيرفر."}
+
         db = SessionLocal()
         try:
             existing = workers_repo.get_active_for_user(db, self.user_id)
@@ -60,9 +71,7 @@ class BotRunner:
         finally:
             db.close()
 
-        connector = MockMT5Connector(symbol=self.symbol) if self.mode == "mock" else None
-        if connector is None:
-            raise ValueError("Live mode must be started with a real connector (see mt5/connector.py).")
+        connector = MockMT5Connector(symbol=self.symbol)
 
         self.engine = TradingEngine(connector=connector)
         self.engine.symbol = self.symbol

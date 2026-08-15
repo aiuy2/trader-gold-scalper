@@ -10,13 +10,17 @@ keeps the connection open and handles two kinds of inbound messages:
 
 Both share this one endpoint/connection type on purpose - a local-client
 session is just a connection that happens to send "report" messages
-instead of "subscribe" ones, so no separate auth/route is needed."""
+instead of "subscribe" ones, so no separate auth/route is needed. The
+connection is tagged LOCAL_CLIENT in connection_manager.py the moment its
+first "report" arrives (see ConnectionManager.mark_kind), so a future
+feature that needs to reach the desktop worker specifically - and not a
+browser tab watching the same account - has a way to do that."""
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
 from app.security import decode_access_token
 from database.database import SessionLocal
 from database.repositories import users as users_repo
-from websocket.connection_manager import manager
+from websocket.connection_manager import manager, LOCAL_CLIENT
 from websocket.subscriptions import subscriptions
 from services.report_sync import LocalClientSession, handle_report, end_session
 
@@ -47,6 +51,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
             if "subscribe" in message:
                 subscriptions.subscribe(websocket, message["subscribe"])
             elif "report" in message:
+                manager.mark_kind(user.id, websocket, LOCAL_CLIENT)
                 handle_report(session, message["report"])
     except WebSocketDisconnect:
         manager.disconnect(user.id, websocket)
